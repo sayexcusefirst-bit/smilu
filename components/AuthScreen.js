@@ -95,9 +95,9 @@ export default function AuthScreen({ onLogin }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               style={{
-                width: '100%', background: 'rgba(255,255,255,0.05)',
+                width: '100%', background: 'var(--glass-bg)',
                 border: '1px solid var(--glass-border)', borderRadius: '12px',
-                padding: '16px', color: 'white', fontSize: '1.1rem',
+                padding: '16px', color: 'var(--text-main)', fontSize: '1.1rem',
                 outline: 'none', marginBottom: '24px'
               }}
             />
@@ -110,7 +110,7 @@ export default function AuthScreen({ onLogin }) {
                   onClick={() => setAvatar(a)}
                   style={{
                     fontSize: '2rem', cursor: 'pointer',
-                    background: avatar === a ? 'rgba(255,255,255,0.1)' : 'var(--glass-bg)',
+                    background: avatar === a ? 'var(--glass-border)' : 'var(--glass-bg)',
                     border: `1px solid ${avatar === a ? 'var(--brand-accent)' : 'transparent'}`,
                     borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     height: '60px', transition: 'all 0.2s'
@@ -147,7 +147,7 @@ export default function AuthScreen({ onLogin }) {
                 style={{
                   padding: '20px', cursor: 'pointer', textAlign: 'left',
                   border: `2px solid ${skill.label === s.label ? 'var(--brand-accent)' : 'var(--glass-border)'}`,
-                  background: skill.label === s.label ? 'rgba(255,255,255,0.05)' : 'var(--glass-bg)',
+                  background: skill.label === s.label ? 'var(--glass-border)' : 'var(--glass-bg)',
                   transition: 'all 0.2s'
                 }}
               >

@@ -1,4 +1,5 @@
 :root {
+  --page-bg: #000;
   --bg-dark: #050505;
   --bg-gradient: radial-gradient(circle at top right, #1f0f33, #050505 60%);
   --text-main: #f8f8f8;
@@ -13,12 +14,35 @@
   --glass-border: rgba(255, 255, 255, 0.08);
 }
 
+:root[data-color-mode='light'] {
+  --page-bg: #e5e7eb;
+  --bg-dark: #f8fafc;
+  --bg-gradient: radial-gradient(circle at top right, #e0e7ff, #f8fafc 60%);
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  
+  --brand-primary: #7c3aed;
+  --brand-secondary: #2563eb;
+  --brand-accent: #059669;
+  --danger: #dc2626;
+
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.1);
+}
+
 /* Rose Glow (Female) Theme - Soft Pastel Intellectual */
 .mobile-app-frame[data-theme='female'] {
   --bg-gradient: radial-gradient(circle at top right, #2a1520, #0a0508 70%);
   --brand-primary: #f472b6;    /* Soft Pink */
   --brand-secondary: #d946ef;  /* Fuchsia */
   --brand-accent: #fb7185;     /* Rose */
+}
+
+:root[data-color-mode='light'] .mobile-app-frame[data-theme='female'] {
+  --bg-gradient: radial-gradient(circle at top right, #fce7f3, #fdf2f8 70%);
+  --brand-primary: #db2777;
+  --brand-secondary: #c026d3;
+  --brand-accent: #e11d48;
 }
 
 * {
@@ -29,22 +53,25 @@
 }
 
 body {
-  background-color: #000;
+  background-color: var(--page-bg);
   color: var(--text-main);
-  min-height: 100vh;
+  min-height: 100dvh;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 /* The Mobile Viewport Box (Centers on Desktop, full width on Mobile) */
 .mobile-app-frame {
   max-width: 480px;
+  width: 100%;
   margin: 0 auto;
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg-gradient);
   position: relative;
   display: flex;
   flex-direction: column;
   box-shadow: 0 0 50px rgba(139, 92, 246, 0.1);
   overflow-x: hidden;
+  transition: background 0.3s, color 0.3s;
 }
 
 /* Header */
@@ -166,7 +193,7 @@ body {
   background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
   border: none;
   border-radius: 16px;
-  color: white;
+  color: #ffffff;
   font-size: 1.1rem;
   font-weight: 800;
   padding: 16px 40px;
@@ -278,7 +305,7 @@ body {
   position: absolute;
   bottom: 0; left: 0; right: 0;
   height: 80px;
-  background: rgba(5, 5, 5, 0.8);
+  background: var(--glass-bg);
   backdrop-filter: blur(20px);
   border-top: 1px solid var(--glass-border);
   display: flex;
@@ -331,7 +358,7 @@ body {
 .answer-btn {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  color: white;
+  color: var(--text-main);
   padding: 20px;
   border-radius: 16px;
   font-size: 1.1rem;

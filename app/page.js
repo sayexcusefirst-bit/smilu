@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Swords, Target, Trophy, User, BookOpen, BrainCircuit, Lightbulb, Zap, ShoppingBag } from 'lucide-react';
+import { Swords, Target, Trophy, User, BookOpen, BrainCircuit, Lightbulb, Zap, ShoppingBag, Sun, Moon } from 'lucide-react';
 import DuelManager from '../components/DuelManager';
 import AuthScreen from '../components/AuthScreen';
 import StreakCelebration from '../components/StreakCelebration';
@@ -13,6 +13,22 @@ export default function AppHome() {
   const [gameMode, setGameMode] = useState('mixed');
   const [isLoading, setIsLoading] = useState(true);
   const [showStreakCelebration, setShowStreakCelebration] = useState(false);
+  const [isLightMode, setIsLightMode] = useState(false);
+
+  useEffect(() => {
+    const savedMode = localStorage.getItem('smilu_theme');
+    if (savedMode === 'light') setIsLightMode(true);
+  }, []);
+
+  useEffect(() => {
+    if (isLightMode) {
+      document.documentElement.setAttribute('data-color-mode', 'light');
+      localStorage.setItem('smilu_theme', 'light');
+    } else {
+      document.documentElement.setAttribute('data-color-mode', 'dark');
+      localStorage.setItem('smilu_theme', 'dark');
+    }
+  }, [isLightMode]);
 
   useEffect(() => {
     // Initial load
@@ -119,7 +135,7 @@ export default function AppHome() {
       <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>Personalized training based on your performance.</p>
       
       <div className="glass-panel" style={{ padding: '24px', textAlign: 'left', marginBottom: '24px' }}>
-        <h4 style={{ color: 'white', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <h4 style={{ color: 'var(--text-main)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Zap size={18} color="var(--brand-accent)" /> Intelligence Insights
         </h4>
         {getInsights().map((msg, i) => (
@@ -147,15 +163,15 @@ export default function AppHome() {
           <div key={i} style={{ 
             display: 'flex', 
             padding: '20px 20px', 
-            borderBottom: i === 4 ? 'none' : '1px solid rgba(255, 255, 255, 0.05)', 
-            background: p.isMe ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
+            borderBottom: i === 4 ? 'none' : '1px solid var(--glass-border)', 
+            background: p.isMe ? 'var(--glass-border)' : 'transparent',
             alignItems: 'center'
           }}>
             <div style={{ width: '40px', fontWeight: 'bold', fontSize: '1.1rem', color: p.rank <= 3 ? '#facc15' : 'var(--text-muted)' }}>#{p.rank}</div>
-            <div style={{ flex: 1, fontWeight: '700', color: 'white', fontSize: '1.05rem' }}>
+            <div style={{ flex: 1, fontWeight: '700', color: 'var(--text-main)', fontSize: '1.05rem' }}>
               {p.name} {p.isMe && '(You)'}
             </div>
-            <div style={{ fontWeight: '800', fontSize: '1.1rem', color: p.isMe ? 'var(--brand-accent)' : 'white' }}>{p.elo}</div>
+            <div style={{ fontWeight: '800', fontSize: '1.1rem', color: p.isMe ? 'var(--brand-accent)' : 'var(--text-main)' }}>{p.elo}</div>
           </div>
         ))}
       </div>
@@ -207,7 +223,7 @@ export default function AppHome() {
                  <span>{cat}</span>
                  <span>{accuracy}%</span>
                </div>
-               <div style={{height:6, background:'rgba(255,255,255,0.05)', borderRadius:3, overflow:'hidden'}}>
+               <div style={{height:6, background:'var(--glass-border)', borderRadius:3, overflow:'hidden'}}>
                  <div style={{height:'100%', background: accuracy > 70 ? 'var(--brand-accent)' : accuracy > 40 ? 'var(--brand-secondary)' : 'var(--danger)', width: `${accuracy}%`, transition: 'width 1s ease-out'}}></div>
                </div>
              </div>
@@ -232,6 +248,18 @@ export default function AppHome() {
         </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <div 
+            onClick={() => setIsLightMode(!isLightMode)}
+            style={{ 
+              background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', 
+              width: '36px', height: '36px', borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+              transition: 'all 0.2s', color: 'var(--text-main)'
+            }}
+            title="Toggle Theme"
+          >
+            {isLightMode ? <Moon size={18} /> : <Sun size={18} />}
+          </div>
+          <div 
             onClick={() => setActiveTab('profile')}
             style={{ 
               background: 'rgba(251, 191, 36, 0.1)', border: '1px solid rgba(251, 191, 36, 0.2)', 
@@ -239,6 +267,7 @@ export default function AppHome() {
               display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
               fontSize: '1rem', transition: 'all 0.2s'
             }}
+            title="Coins"
           >
             🪙
           </div>
