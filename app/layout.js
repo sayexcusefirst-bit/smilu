@@ -4,11 +4,6 @@ export const metadata = {
   title: 'Smilu - Mobile Vocab Duels',
   description: 'Intellectual multiplayer vocabulary duel game for SSC CGL prep.',
   manifest: '/manifest.json',
-  icons: {
-    icon: "/logo.png",
-    shortcut: "/logo.png",
-    apple: "/logo.png"
-  },
   appleWebApp: {
     title: 'Smilu',
     statusBarStyle: 'black-translucent',

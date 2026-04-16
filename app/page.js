@@ -271,11 +271,6 @@ export default function AppHome() {
           >
             🪙
           </div>
-          {!isDueling && (
-            <div className="online-pill">
-              Online: 394
-            </div>
-          )}
         </div>
       </header>
       
