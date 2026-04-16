@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { getMatchQuestions } from '../lib/vocabData';
+import { updateMatchStats, getUserData } from '../lib/storage';
 import { Swords, CheckCircle2, XCircle } from 'lucide-react';
 
 export default function DuelManager({ onExit, gameMode = 'mixed' }) {
@@ -11,6 +12,14 @@ export default function DuelManager({ onExit, gameMode = 'mixed' }) {
   const [botScore, setBotScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(60); // 60s per match
   const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [user, setUser] = useState(null);
+  const [matchProcessed, setMatchProcessed] = useState(false);
+  const [eloDelta, setEloDelta] = useState(0);
+
+  useEffect(() => {
+    setUser(getUserData());
+  }, []);
 
   useEffect(() => {
     if (gameState === 'lobby') {
@@ -20,7 +29,33 @@ export default function DuelManager({ onExit, gameMode = 'mixed' }) {
         setTimeLeft(60);
       }, 3000); // Simulate 3s matchmaking
     }
-  }, [gameState]);
+  }, [gameState, gameMode]);
+
+  // Handle Match Results persistence
+  useEffect(() => {
+    if (gameState === 'result' && !matchProcessed) {
+      const isWinner = score > botScore;
+      const isTie = score === botScore;
+      
+      const delta = isWinner ? 25 : isTie ? 5 : -15;
+      setEloDelta(delta);
+
+      const result = updateMatchStats({
+        isWin: isWinner,
+        isDraw: isTie,
+        eloDelta: delta,
+        category: gameMode,
+        questionsAnswered: questions.length,
+        questionsCorrect: correctCount
+      });
+
+      if (result.streakUpdated) {
+        window.dispatchEvent(new Event('smilu_streak_celebration'));
+      }
+
+      setMatchProcessed(true);
+    }
+  }, [gameState, score, botScore, questions.length, correctCount, gameMode, matchProcessed]);
 
   // Main Timer
   useEffect(() => {
@@ -36,9 +71,7 @@ export default function DuelManager({ onExit, gameMode = 'mixed' }) {
   // Bot logic
   useEffect(() => {
     if (gameState === 'playing' && !selectedAnswer) {
-      // Bot answers randomly every 3-6 seconds
       const botTimer = setTimeout(() => {
-        // 70% chance bot gets it right
         const isCorrect = Math.random() < 0.7;
         if (isCorrect) {
           setBotScore(prev => prev + 10);
@@ -56,9 +89,9 @@ export default function DuelManager({ onExit, gameMode = 'mixed' }) {
     
     if (option === currQ.answer) {
       setScore(prev => prev + 10);
+      setCorrectCount(prev => prev + 1);
     }
 
-    // Move to next question after delay
     setTimeout(() => {
       if (currentIndex < questions.length - 1) {
         setCurrentIndex(prev => prev + 1);
@@ -72,14 +105,22 @@ export default function DuelManager({ onExit, gameMode = 'mixed' }) {
   if (gameState === 'lobby') {
     return (
       <div style={{ textAlign: 'center', paddingTop: '100px' }} className="animate-slide-up">
-        <Swords size={64} color="var(--neon-purple)" className="animate-pulse" style={{ margin: '0 auto 20px' }} />
+        <Swords size={64} className="animate-pulse" style={{ margin: '0 auto 20px', color: 'var(--brand-primary)' }} />
         <h2 className="text-glow">Finding Opponent...</h2>
-        <p>Estimated queue time: 0:03</p>
+        <p style={{color: 'var(--text-muted)'}}>Mode: {gameMode.toUpperCase()}</p>
         
-        <div className="glass-panel" style={{ marginTop: '40px', padding: '20px' }}>
-          <h3>Your Rating: 1200 Elo</h3>
-          <p>Matchmaking in progress. Get ready!</p>
+        <div className="glass-panel" style={{ marginTop: '40px', padding: '24px' }}>
+          <h3>{user?.username || 'Challenger'}</h3>
+          <p style={{color: 'var(--brand-accent)', fontWeight: 'bold'}}>{user?.elo || 1200} ELO</p>
+          <p style={{marginTop: '12px', fontSize: '0.8rem', color: 'var(--text-muted)'}}>Calibrating arena for {user?.skillLevel || 'Normal'} difficulty...</p>
         </div>
+
+        <button 
+          onClick={onExit}
+          style={{ marginTop: '40px', background: 'transparent', border: '1px solid var(--glass-border)', color: 'var(--text-muted)', padding: '12px 24px', borderRadius: '12px', cursor: 'pointer' }}
+        >
+          Cancel Matchmaking
+        </button>
       </div>
     );
   }
@@ -90,16 +131,23 @@ export default function DuelManager({ onExit, gameMode = 'mixed' }) {
       <div className="animate-slide-up">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <div>
-            <div style={{ fontSize: '0.8rem', color: '#aaa' }}>You</div>
-            <div className="text-gradient" style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{score}</div>
+            <div style={{ fontSize: '0.7rem', color: '#aaa', textTransform: 'uppercase' }}>You</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--brand-accent)' }}>{score}</div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: timeLeft <= 10 ? 'var(--neon-red)' : 'white' }}>0:{timeLeft.toString().padStart(2, '0')}</div>
-            <div style={{ fontSize: '0.8rem', color: '#aaa' }}>Match Timer</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: '900', color: timeLeft <= 10 ? 'var(--danger)' : 'white' }}>
+              {Math.floor(timeLeft / 60)}:{ (timeLeft % 60).toString().padStart(2, '0') }
+            </div>
+            <button 
+              onClick={onExit}
+              style={{ fontSize: '0.6rem', color: 'var(--danger)', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer', marginTop: '4px' }}
+            >
+              EXIT
+            </button>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '0.8rem', color: '#aaa' }}>Opponent</div>
-            <div className="text-glow" style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--neon-red)' }}>{botScore}</div>
+            <div style={{ fontSize: '0.7rem', color: '#aaa', textTransform: 'uppercase' }}>Opponent</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--brand-secondary)' }}>{botScore}</div>
           </div>
         </div>
 
@@ -107,16 +155,16 @@ export default function DuelManager({ onExit, gameMode = 'mixed' }) {
           <div className="progress-bar-drain" style={{ animationDuration: '60s' }}></div>
         </div>
 
-        <div className="glass-panel" style={{ padding: '30px 20px', textAlign: 'center', marginBottom: '30px' }}>
-          <span style={{ display: 'inline-block', background: 'rgba(139, 92, 246, 0.2)', color: 'var(--neon-purple)', padding: '4px 12px', borderRadius: '12px', fontSize: '0.8rem', marginBottom: '10px', textTransform: 'uppercase' }}>
-            {currQ.type}
+        <div className="glass-panel" style={{ padding: '32px 20px', textAlign: 'center', marginBottom: '30px' }}>
+          <span style={{ display: 'inline-block', background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)', padding: '4px 12px', borderRadius: '12px', fontSize: '0.7rem', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: 1 }}>
+            {currQ?.type} Logic
           </span>
-          <h2 style={{ fontSize: '2rem', marginBottom: '10px' }}>{currQ.word}</h2>
-          <p style={{ color: '#888', fontStyle: 'italic' }}>Hint: {currQ.hint_hi}</p>
+          <h2 style={{ fontSize: '2.2rem', fontWeight: '900', marginBottom: '8px' }}>{currQ?.word}</h2>
+          <p style={{ color: 'var(--brand-accent)', fontStyle: 'italic', fontSize: '0.9rem' }}>Hint: {currQ?.hint_hi}</p>
         </div>
 
         <div className="answers-grid">
-          {currQ.options.map((opt, i) => {
+          {currQ?.options.map((opt, i) => {
             let className = 'answer-btn';
             if (selectedAnswer) {
               if (opt === currQ.answer) className += ' correct';
@@ -124,12 +172,7 @@ export default function DuelManager({ onExit, gameMode = 'mixed' }) {
             }
 
             return (
-              <button 
-                key={i} 
-                className={className}
-                onClick={() => handleAnswer(opt)}
-                disabled={!!selectedAnswer}
-              >
+              <button key={i} className={className} onClick={() => handleAnswer(opt)} disabled={!!selectedAnswer}>
                 {opt}
               </button>
             )
@@ -139,41 +182,51 @@ export default function DuelManager({ onExit, gameMode = 'mixed' }) {
     );
   }
 
-  // Result screen
   const isWinner = score > botScore;
   const isTie = score === botScore;
 
   return (
-    <div style={{ textAlign: 'center', paddingTop: '60px' }} className="animate-slide-up">
+    <div style={{ textAlign: 'center', paddingTop: '40px' }} className="animate-slide-up">
       {isWinner ? (
-        <CheckCircle2 size={80} color="var(--neon-green)" style={{ margin: '0 auto 20px' }} />
+        <CheckCircle2 size={80} color="var(--brand-accent)" style={{ margin: '0 auto 20px' }} />
       ) : isTie ? (
         <Swords size={80} color="#ccc" style={{ margin: '0 auto 20px' }} />
       ) : (
-        <XCircle size={80} color="var(--neon-red)" style={{ margin: '0 auto 20px' }} />
+        <XCircle size={80} color="var(--danger)" style={{ margin: '0 auto 20px' }} />
       )}
       
-      <h1 className={isWinner ? "text-gradient" : ""} style={{ fontSize: '2.5rem' }}>
-        {isWinner ? 'Victory!' : isTie ? 'Draw!' : 'Defeat!'}
+      <h1 style={{ fontSize: '3rem', fontWeight: '900', marginBottom: '10px' }}>
+        {isWinner ? 'VICTORY' : isTie ? 'DRAW' : 'DEFEAT'}
       </h1>
 
-      <div style={{ display: 'flex', justifyContent: 'space-around', margin: '40px 0' }}>
-        <div className="glass-panel" style={{ padding: '20px', width: '45%' }}>
-          <div style={{ fontSize: '0.9rem', color: '#aaa' }}>Your Score</div>
-          <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{score}</div>
-          <div style={{ color: 'var(--neon-green)', marginTop: '10px' }}>{isWinner ? '+25 Elo' : isTie ? '+0 Elo' : '-15 Elo'}</div>
+      <div style={{ display: 'flex', gap: '16px', margin: '40px 0' }}>
+        <div className="glass-panel" style={{ flex: 1, padding: '24px' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Match ELO</div>
+          <div style={{ fontSize: '2rem', fontWeight: '900' }}>{user?.elo + eloDelta}</div>
+          <div style={{ color: eloDelta >= 0 ? 'var(--brand-accent)' : 'var(--danger)', fontWeight: 'bold' }}>
+            {eloDelta >= 0 ? '+' : ''}{eloDelta}
+          </div>
         </div>
-        <div className="glass-panel" style={{ padding: '20px', width: '45%' }}>
-          <div style={{ fontSize: '0.9rem', color: '#aaa' }}>Bot Score</div>
-          <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{botScore}</div>
+        <div className="glass-panel" style={{ flex: 1, padding: '24px' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Accuracy</div>
+          <div style={{ fontSize: '2rem', fontWeight: '900' }}>{Math.round((correctCount / questions.length) * 100)}%</div>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{correctCount}/{questions.length} Correct</div>
         </div>
       </div>
 
-      <button className="btn-neon" style={{ marginRight: '16px' }} onClick={() => setGameState('lobby')}>
-        Rematch
+      <button className="btn-play-huge" style={{ marginBottom: '16px' }} onClick={() => {
+        setMatchProcessed(false);
+        setGameState('lobby');
+        setScore(0);
+        setBotScore(0);
+        setCorrectCount(0);
+        setCurrentIndex(0);
+        setSelectedAnswer(null);
+      }}>
+        FIND NEW MATCH
       </button>
-      <button className="btn-neon" style={{ background: 'transparent', borderColor: '#444' }} onClick={onExit}>
-        Back to Home
+      <button className="btn-play-huge" style={{ background: 'transparent', border: '1px solid var(--glass-border)' }} onClick={onExit}>
+        Exit Arena
       </button>
     </div>
   );
