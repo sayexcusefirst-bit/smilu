@@ -55,7 +55,8 @@
 body {
   background-color: var(--page-bg);
   color: var(--text-main);
-  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
   transition: background-color 0.3s, color 0.3s;
 }
 
@@ -64,13 +65,14 @@ body {
   max-width: 480px;
   width: 100%;
   margin: 0 auto;
-  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 100dvh;
   background: var(--bg-gradient);
   position: relative;
   display: flex;
   flex-direction: column;
   box-shadow: 0 0 50px rgba(139, 92, 246, 0.1);
-  overflow-x: hidden;
+  overflow: hidden;
   transition: background 0.3s, color 0.3s;
 }
 
@@ -396,4 +398,56 @@ body {
 @keyframes progress-drain {
   from { width: 100%; }
   to { width: 0%; }
+}
+
+/* Responsive scaling for shorter screens to compress the UI and minimize scrolling */
+@media (max-height: 750px) {
+  .app-header {
+    padding: 12px 20px;
+  }
+  .hero-card {
+    padding: 24px 20px;
+    margin-bottom: 20px;
+    margin-top: 0;
+  }
+  .user-elo {
+    font-size: 2rem;
+    margin-bottom: 12px;
+  }
+  .btn-play-huge {
+    padding: 12px 40px;
+    font-size: 1rem;
+  }
+  .mode-icon-wrapper {
+    width: 32px; height: 32px;
+    margin-bottom: 10px;
+  }
+  .mode-card h3 {
+    font-size: 1rem;
+  }
+  .mode-card {
+    padding: 16px;
+    min-width: 140px;
+  }
+  .carousel-track {
+    padding-bottom: 6px;
+  }
+  .daily-banner {
+    padding: 12px;
+  }
+  .bottom-nav {
+    height: 60px;
+  }
+  .content-scroll {
+    padding-bottom: 80px; 
+  }
+}
+
+@media (max-height: 650px) {
+  .hero-card { padding: 16px 20px; margin-bottom: 12px; }
+  .user-elo { font-size: 1.6rem; }
+  .btn-play-huge { padding: 10px 40px; }
+  .mode-card { padding: 12px; min-width: 120px; }
+  .bottom-nav { height: 50px; }
+  .content-scroll { padding-bottom: 60px; }
 }
