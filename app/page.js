@@ -1,16 +1,14 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Swords, Target, Trophy, User, BookOpen, BrainCircuit, Lightbulb, Zap, ShoppingBag, Sun, Moon } from 'lucide-react';
-import DuelManager from '../components/DuelManager';
+import { useRouter } from 'next/navigation';
+import { Swords, Target, Trophy, User, BookOpen, BrainCircuit, Lightbulb, Zap, ShoppingBag, Sun, Moon, Shield, Sparkles } from 'lucide-react';
 import AuthScreen from '../components/AuthScreen';
 import StreakCelebration from '../components/StreakCelebration';
 import { getUserData, getInsights } from '../lib/storage';
-
 export default function AppHome() {
+  const router = useRouter();
   const [user, setUser] = useState(null);
-  const [activeTab, setActiveTab] = useState('duels');
-  const [isDueling, setIsDueling] = useState(false);
-  const [gameMode, setGameMode] = useState('mixed');
+  const [activeTab, setActiveTab] = useState('play');
   const [isLoading, setIsLoading] = useState(true);
   const [showStreakCelebration, setShowStreakCelebration] = useState(false);
   const [isLightMode, setIsLightMode] = useState(false);
@@ -59,9 +57,8 @@ export default function AppHome() {
     };
   }, []);
 
-  const startDuel = (mode = 'mixed') => {
-    setGameMode(mode);
-    setIsDueling(true);
+  const startGame = (mode = 'mixed') => {
+    router.push(`/games/${mode}`);
   };
 
   if (isLoading) return <div className="mobile-app-frame" style={{display:'flex', alignItems:'center', justifyContent:'center'}}>🌵</div>;
@@ -70,14 +67,14 @@ export default function AppHome() {
     return <AuthScreen onLogin={setUser} />;
   }
 
-  const renderDuelsTab = () => (
+  const renderPlayTab = () => (
     <>
       <div className="hero-card">
         <div className="hero-content">
           <p className="user-rank">{user.skillLevel} Scholar</p>
           <div className="user-elo text-glow">{user.elo} ELO</div>
-          <button className="btn-play-huge" onClick={() => startDuel('mixed')}>
-            Play Ranked
+          <button className="btn-play-huge" onClick={() => startGame('mixed')}>
+            Start Training
           </button>
         </div>
       </div>
@@ -89,29 +86,51 @@ export default function AppHome() {
         </div>
       </div>
 
-      <div className="carousel-track">
-        <div className="mode-card" onClick={() => startDuel('blitz')}>
-          <div className="mode-icon-wrapper" style={{background: 'rgba(59, 130, 246, 0.15)'}}>
-            <BookOpen size={24} color="var(--brand-secondary)" />
-          </div>
-          <h3>Blitz</h3>
-          <p>Rapid fire Synonyms & Antonyms.</p>
-        </div>
+      <div className="carousel-track" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', overflowX: 'visible', paddingRight: 0 }}>
         
-        <div className="mode-card" onClick={() => startDuel('logic')}>
-          <div className="mode-icon-wrapper" style={{background: 'rgba(168, 85, 247, 0.15)'}}>
-            <Lightbulb size={24} color="var(--brand-primary)" />
+        <div className="mode-card" onClick={() => startGame('idioms')} style={{ minWidth: '100%', padding: '20px' }}>
+          <div className="mode-icon-wrapper" style={{background: 'rgba(249, 115, 22, 0.15)'}}>
+            <Sparkles size={24} color="#f97316" />
           </div>
-          <h3>Logic</h3>
-          <p>Decode idioms and one-words.</p>
+          <h3 style={{fontSize: '1rem'}}>Idioms Theater</h3>
+          <p style={{fontSize: '0.75rem'}}>Animated scene & meaning quizzes.</p>
         </div>
 
-        <div className="mode-card" onClick={() => startDuel('mixed')}>
-          <div className="mode-icon-wrapper" style={{background: 'rgba(16, 185, 129, 0.15)'}}>
-            <BrainCircuit size={24} color="var(--brand-accent)" />
+        <div className="mode-card" onClick={() => startGame('synonyms')} style={{ minWidth: '100%', padding: '20px' }}>
+          <div className="mode-icon-wrapper" style={{background: 'rgba(59, 130, 246, 0.15)'}}>
+            <Swords size={24} color="#3b82f6" />
           </div>
-          <h3>Mixed</h3>
-          <p>The standard CGL vocabulary mock.</p>
+          <h3 style={{fontSize: '1rem'}}>Synonyms Battle</h3>
+          <p style={{fontSize: '0.75rem'}}>Defeat enemies with similar words.</p>
+        </div>
+
+        <div className="mode-card" onClick={() => startGame('antonyms')} style={{ minWidth: '100%', padding: '20px' }}>
+          <div className="mode-icon-wrapper" style={{background: 'rgba(239, 68, 68, 0.15)'}}>
+            <Shield size={24} color="#ef4444" />
+          </div>
+          <h3 style={{fontSize: '1rem'}}>Antonyms Arena</h3>
+          <p style={{fontSize: '0.75rem'}}>Defend by finding opposites.</p>
+        </div>
+        
+        <div className="mode-card" onClick={() => startGame('ows')} style={{ minWidth: '100%', padding: '20px' }}>
+          <div className="mode-icon-wrapper" style={{background: 'rgba(168, 85, 247, 0.15)'}}>
+            <Lightbulb size={24} color="#a855f7" />
+          </div>
+          <h3 style={{fontSize: '1rem'}}>OWS Chamber</h3>
+          <p style={{fontSize: '0.75rem'}}>One-word substitution trials.</p>
+        </div>
+
+      </div>
+
+      <div style={{ marginTop: '16px' }} onClick={() => startGame('mixed')}>
+        <div className="mode-card" style={{ minWidth: '100%', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05))', border: '1px solid rgba(16, 185, 129, 0.3)', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div className="mode-icon-wrapper" style={{background: 'rgba(16, 185, 129, 0.2)'}}>
+            <BrainCircuit size={28} color="#10b981" />
+          </div>
+          <div>
+            <h3 style={{fontSize: '1.1rem', color: '#10b981'}}>Mixed SSC Quiz Show</h3>
+            <p style={{fontSize: '0.8rem'}}>The ultimate fast-paced mock.</p>
+          </div>
         </div>
       </div>
 
@@ -145,36 +164,7 @@ export default function AppHome() {
         ))}
       </div>
 
-      <button className="btn-play-huge" onClick={() => startDuel('mixed')}>START TRAINING</button>
-    </div>
-  );
-
-  const renderLeaderboardTab = () => (
-    <div>
-      <h4 className="carousel-header" style={{ marginTop: '10px' }}>Global Arena</h4>
-      <div className="glass-panel" style={{ overflow: 'hidden' }}>
-        {[
-          { rank: 1, name: 'Slayer99', elo: 2840 },
-          { rank: 2, name: 'RohanSSC', elo: 2790 },
-          { rank: 3, name: 'DivyaVocab', elo: 2650 },
-          { rank: 34, name: user.username, elo: user.elo, isMe: true },
-          { rank: 35, name: 'Priya20', elo: 1210 },
-        ].map((p, i) => (
-          <div key={i} style={{ 
-            display: 'flex', 
-            padding: '20px 20px', 
-            borderBottom: i === 4 ? 'none' : '1px solid var(--glass-border)', 
-            background: p.isMe ? 'var(--glass-border)' : 'transparent',
-            alignItems: 'center'
-          }}>
-            <div style={{ width: '40px', fontWeight: 'bold', fontSize: '1.1rem', color: p.rank <= 3 ? '#facc15' : 'var(--text-muted)' }}>#{p.rank}</div>
-            <div style={{ flex: 1, fontWeight: '700', color: 'var(--text-main)', fontSize: '1.05rem' }}>
-              {p.name} {p.isMe && '(You)'}
-            </div>
-            <div style={{ fontWeight: '800', fontSize: '1.1rem', color: p.isMe ? 'var(--brand-accent)' : 'var(--text-main)' }}>{p.elo}</div>
-          </div>
-        ))}
-      </div>
+      <button className="btn-play-huge" onClick={() => startGame('mixed')}>START TRAINING</button>
     </div>
   );
 
@@ -274,41 +264,26 @@ export default function AppHome() {
         </div>
       </header>
       
-      <main className="content-scroll">
-        {isDueling ? (
-          <div style={{ paddingTop: '20px' }}>
-            <DuelManager onExit={() => setIsDueling(false)} gameMode={gameMode} />
-          </div>
-        ) : (
-          <>
-            {activeTab === 'duels' && renderDuelsTab()}
-            {activeTab === 'daily' && renderDailyTab()}
-            {activeTab === 'leaderboard' && renderLeaderboardTab()}
-            {activeTab === 'profile' && renderProfileTab()}
-          </>
-        )}
+      <main className="content-scroll" style={{ paddingBottom: '80px' }}>
+        {activeTab === 'play' && renderPlayTab()}
+        {activeTab === 'daily' && renderDailyTab()}
+        {activeTab === 'profile' && renderProfileTab()}
       </main>
 
-      {!isDueling && (
-        <nav className="bottom-nav">
-          <button className={`nav-item ${activeTab === 'duels' ? 'active' : ''}`} onClick={() => setActiveTab('duels')}>
-            <Swords size={22} />
-            <span>Duels</span>
+      <nav className="bottom-nav">
+          <button className={`nav-item ${activeTab === 'play' ? 'active' : ''}`} onClick={() => setActiveTab('play')}>
+            <BookOpen size={22} />
+            <span>Play</span>
           </button>
           <button className={`nav-item ${activeTab === 'daily' ? 'active' : ''}`} onClick={() => setActiveTab('daily')}>
             <Target size={22} />
             <span>Daily</span>
-          </button>
-          <button className={`nav-item ${activeTab === 'leaderboard' ? 'active' : ''}`} onClick={() => setActiveTab('leaderboard')}>
-            <Trophy size={22} />
-            <span>Ranks</span>
           </button>
           <button className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>
             <User size={22} />
             <span>Profile</span>
           </button>
         </nav>
-      )}
     </div>
   );
 }
