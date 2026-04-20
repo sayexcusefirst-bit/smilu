@@ -9,9 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "framer-motion": "^12.38.0",
+    "lucide-react": "^0.395.0",
     "next": "14.2.20",
     "react": "^18",
-    "react-dom": "^18",
-    "lucide-react": "^0.395.0"
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "prisma": "^5.22.0"
   }
 }
