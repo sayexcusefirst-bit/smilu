@@ -1,0 +1,24 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./vocab.db"
+}
+
+model VocabQuestion {
+  id          Int      @id @default(autoincrement())
+  word        String
+  type        String   // Legacy field, e.g. 'blitz' or 'logic'
+  options     String   // JSON stringified array of options
+  answer      String
+  hint_hi     String?
+  category    String?  // 'idiom', 'synonym', 'antonym', 'ows'
+  explanation String?
+  difficulty  String?
+  visualHint  String?  // e.g., 'raining_cats', 'bite_bullet'
+}
