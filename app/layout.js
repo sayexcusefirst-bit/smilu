@@ -8,8 +8,11 @@ export const metadata = {
     title: 'Smilu',
     statusBarStyle: 'black-translucent',
     capable: true,
-  },
-  themeColor: '#050505'
+  }
+};
+
+export const viewport = {
+  themeColor: '#050505',
 };
 
 export default function RootLayout({ children }) {
