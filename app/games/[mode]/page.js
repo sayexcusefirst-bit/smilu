@@ -13,7 +13,7 @@ export default function GameModePage({ params }) {
 
   return (
     <div className="mobile-app-frame" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ flex: 1, padding: '20px 0' }}>
+      <div style={{ flex: 1, padding: '20px' }}>
         {mode === 'idioms' ? (
           <IdiomsTheaterEngine onExit={handleExit} />
         ) : (
